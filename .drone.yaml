@@ -1,0 +1,34 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: restore-cache
+    image: drillster/drone-volume-cache
+    volumes:
+      - name: cache
+        path: /cache
+    settings:
+      restore: true
+      mount:
+        - ~/.m2
+
+  - name: build-and-test
+    image: maven:3.9.6-eclipse-temurin-21
+    commands:
+      - mvn clean install
+
+  - name: save-cache
+    image: drillster/drone-volume-cache
+    volumes:
+      - name: cache
+        path: /cache
+    settings:
+      rebuild: true
+      mount:
+        - ~/.m2
+
+volumes:
+  - name: cache
+    host:
+      path: /tmp/cache
